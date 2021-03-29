@@ -19,7 +19,14 @@ public class UnitConverterController {
 
     @GetMapping("/units/si")
     public ResponseEntity<?> convertUnits(@RequestParam(name = "units")String units) {
-        Map<String, Object> result = service.convert(units);
-        return ResponseEntity.ok(result);
+    	Map<String, Object> result = new HashMap<>();
+    	try {
+    		result = service.convert(units);
+    	} catch(Exception e) {
+    		result.put("error: ", "fail parsing unit");
+    		return ResponseEntity.badRequest().body(result);
+    	}
+    	return ResponseEntity.ok(result);
     }
 }
+    	

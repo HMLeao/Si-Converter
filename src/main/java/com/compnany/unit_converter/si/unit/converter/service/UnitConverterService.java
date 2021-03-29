@@ -15,17 +15,21 @@ public class UnitConverterService {
 	private UnitConverter converter;
 	
 			
-    public Map<String,Object> convert(final String units) {
+    public Map<String,Object> convert(final String units) throws Exception {
     	
     	Map<String, Object> result = new HashMap<>();
-    	
-    	String convertedString = converter.getConvertedString(units);
-    	Float multiplicationFactor = converter.getConvertedMultiplicationFactor(units);
-    	
-        result.put("unit_name",convertedString);
-        result.put("multiplication_factor",multiplicationFactor);
 
-        return result;
+    	try {
+    		String convertedString = converter.getConvertedString(units);
+    		Float multiplicationFactor = converter.getConvertedMultiplicationFactor(units);
+    		result.put("unit_name",convertedString);
+    		result.put("multiplication_factor",multiplicationFactor);
+    	} catch (NullPointerException np) {
+    		System.out.println("error: fail to parse unit");
+    		throw np;
+    	} 
+    	
+    	return result;
     }
     
 }

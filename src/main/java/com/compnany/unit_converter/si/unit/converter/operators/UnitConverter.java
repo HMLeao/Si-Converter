@@ -41,14 +41,19 @@ public class UnitConverter {
     
     
 	
-    public String getConvertedString(final String unitsString) {
+    public String getConvertedString(final String unitsString) throws NullPointerException{
     	
     	List<String> unitsToConvert = Arrays.asList(unitsString.replaceAll("[()]", "").split("[/*]"));
     	
     	String convertedString = unitsString;
     	
     	for(String unit: unitsToConvert) {
-    		convertedString = convertedString.replaceAll(unit, this.getSIUniMatching(unit).getUnitName());
+    		SIUnit siUnit = this.getSIUniMatching(unit);
+    		if(siUnit != null) {
+    			convertedString = convertedString.replaceAll(unit, siUnit.getUnitName());
+    		} else {
+    			throw new NullPointerException();
+    		}
     	}
     	
     	return convertedString;
