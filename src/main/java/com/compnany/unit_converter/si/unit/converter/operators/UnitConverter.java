@@ -2,6 +2,7 @@ package com.compnany.unit_converter.si.unit.converter.operators;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -34,6 +35,9 @@ public class UnitConverter {
     	conversionTable.put(UnitConstants.CUBIC_METER, new SIUnit("m3", 1F));
     	conversionTable.put(UnitConstants.SECOND, new SIUnit("s", 1F));
     	conversionTable.put(UnitConstants.RAD, new SIUnit("rad", 1F));
+    	conversionTable.put(UnitConstants.METER, new SIUnit("m", 1F));
+    	conversionTable.put(UnitConstants.KILOMETER, new SIUnit("m", 1000F));
+    	conversionTable.put(UnitConstants.GRAM, new SIUnit("kg", 0.001F));
 		
 		this.conversionTable = conversionTable;
 	}
@@ -41,7 +45,9 @@ public class UnitConverter {
     
     
 	
-    public String getConvertedString(final String unitsString) throws NullPointerException{
+    public String getConvertedString(String unitsString) throws NullPointerException{
+    	
+    	unitsString = this.addParenthesis(unitsString);
     	
     	List<String> unitsToConvert = Arrays.asList(unitsString.replaceAll("[()]", "").split("[/*]"));
     	
@@ -79,9 +85,10 @@ public class UnitConverter {
 
 
 
-	public Float getConvertedMultiplicationFactor(final String units) {
+	public Float getConvertedMultiplicationFactor(String units) {
 		
-		
+		units = this.addParenthesis(units);
+				
 		List<String> operands = Arrays.asList(units.split("[()/*]"))
 				.stream().filter(s -> !s.isBlank())
 				.map(s -> s.strip())
@@ -93,10 +100,38 @@ public class UnitConverter {
 				.stream().filter(s -> !s.isBlank())
 				.collect(Collectors.toList());
 		
-//		IOperation<Float,?> operation;
+		return this.calculateOperations(operands.iterator(), operators.iterator());
 		
+	}
+	
+	
+	public Float calculateOperations(final Iterator<String> operandsIterator, final Iterator<String> operatorsIterator) {
+		MixedOperation operation = new MixedOperation();
 		
-		return 123456F;
+		while(operatorsIterator.hasNext()) {
+			
+			String operator = operatorsIterator.next();
+			
+			if(operator.matches("[(]{1}")) {		 
+				operation.setOp1(this.getSIUniMatching(operandsIterator.next()).getMultiplicationFactor());
+			} else if (operator.matches("[/]{1}") || operator.matches("[\\*]{1}")) {
+				operation.setOperator(operator);
+				operation.setOp2(this.getSIUniMatching(operandsIterator.next()).getMultiplicationFactor());
+			} else if (operator.matches("[)]{1}")) {
+				break;
+			}
+		}
+		
+		Float result = operation.operate();
+		
+		return result;
+	}
+	
+	private String addParenthesis(String s) {
+    	if(!s.matches("[(].+[)]")) {
+    		s = "(" + s + ")";
+    	}
+    	return s;
 	}
     
 }
